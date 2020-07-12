@@ -1,0 +1,14 @@
+plugins:
+  - jest
+env:
+  es2020: true
+  node: true
+  jest: true
+extends:
+  - airbnb-base
+  - plugin:jest/recommended
+parserOptions:
+  ecmaVersion: 11
+  sourceType: module
+rules:
+  no-console: off

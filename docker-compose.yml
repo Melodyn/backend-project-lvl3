@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  loader:
+    build: .
+    volumes:
+    - .:/usr/src/app
+    image: hexlet:loader
+    container_name: hexlet_gendiff
+
+  loader_dev:
+    build: .
+    volumes:
+    - .:/usr/src/app
+    - $HOME/asciinema-id:/root/.config/asciinema/install-id
+    image: hexlet:loader
+    container_name: hexlet_loader
