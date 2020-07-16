@@ -33,3 +33,5 @@
 * `make test` проверка тестами
 
 ## Демонстрация
+
+* step 1: https://asciinema.org/a/347951

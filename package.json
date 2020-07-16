@@ -7,6 +7,9 @@
   "scripts": {
     "test": "npx -n '--experimental-vm-modules --no-warnings' jest"
   },
+  "bin": {
+    "page-loader": "bin/index.js"
+  },
   "jest": {
     "testEnvironment": "node",
     "transform": {}

@@ -28,4 +28,4 @@ asciinema:
 publish:
 	npm publish --dry-run
 container_dev_start:
-	docker-compose run --rm gendiff_dev /bin/bash
+	docker-compose run --rm loader_dev /bin/bash
