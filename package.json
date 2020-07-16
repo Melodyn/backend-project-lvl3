@@ -1,8 +1,9 @@
 {
   "name": "@melodyn/backend-project-lvl3",
   "version": "1.0.0",
-  "description": "",
+  "description": "Утилита командной строки page-loader, которая, скачивает страницу из сети и кладет в указанную директорию (по умолчанию в директорию запуска программы).",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "npx -n '--experimental-vm-modules --no-warnings' jest"
   },
@@ -22,6 +23,7 @@
   },
   "homepage": "https://github.com/Melodyn/backend-project-lvl3#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "commander": "^5.1.0",
     "lodash": "^4.17.19"
   },
@@ -30,6 +32,7 @@
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jest": "^23.18.0",
-    "jest": "^26.1.0"
+    "jest": "^26.1.0",
+    "nock": "^13.0.2"
   }
 }

@@ -5,7 +5,7 @@ services:
     volumes:
     - .:/usr/src/app
     image: hexlet:loader
-    container_name: hexlet_gendiff
+    container_name: hexlet_loader
 
   loader_dev:
     build: .
