@@ -6,8 +6,8 @@ import { urlToName } from './pathToolkit.js';
 const createFile = (dirpath, filename, content) => fs
   .writeFile(path.resolve(dirpath, filename), content);
 
-const pageLoader = (url, outputDirPath) => axios.get(url)
+const pageLoader = (url, outputDirPath) => axios.get(url.toString())
   .then(({ data }) => data)
-  .then((data) => createFile(outputDirPath, urlToName(new URL(url), '.html'), data));
+  .then((data) => createFile(outputDirPath, urlToName(url, '.html'), data));
 
 export default pageLoader;

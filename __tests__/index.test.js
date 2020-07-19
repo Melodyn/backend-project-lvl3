@@ -3,9 +3,10 @@ import path from 'path';
 import os from 'os';
 import nock from 'nock';
 import pageLoader from '../index.js';
+import * as pathToolkit from '../src/pathToolkit.js';
 
-const baseUrl = 'https://hexlet.io';
-const page = '/courses';
+const url = new URL('https://hexlet.io/courses');
+const domain = pathToolkit.getDomain(url);
 const expectedContent = 'Hello from hexlet.io courses!';
 const expectedFilename = 'hexlet-io-courses.html';
 
@@ -22,8 +23,8 @@ test('tmp dir', async () => {
   const fileAlreadyExist = await fileExists(tmpDirPath, expectedFilename);
   expect(fileAlreadyExist).toBe(false);
 
-  nock(baseUrl).get(page).reply(200, expectedContent);
-  await pageLoader(baseUrl + page, tmpDirPath);
+  nock(new RegExp(domain)).get(/.*/).reply(200, expectedContent);
+  await pageLoader(url, tmpDirPath);
 
   const fileWasCreated = await fileExists(tmpDirPath, expectedFilename);
   expect(fileWasCreated).toBe(true);
