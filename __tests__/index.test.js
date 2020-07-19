@@ -18,13 +18,6 @@ beforeAll(async () => {
   tmpDirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
-afterAll(async () => {
-  await fs.readdir(tmpDirPath)
-    .then((filenames) => filenames.map((filename) => path.join(tmpDirPath, filename)))
-    .then((paths) => Promise.all(paths.map((filepath) => fs.unlink(filepath))));
-  await fs.rmdir(tmpDirPath);
-});
-
 test('tmp dir', async () => {
   const fileAlreadyExist = await fileExists(tmpDirPath, expectedFilename);
   expect(fileAlreadyExist).toBe(false);

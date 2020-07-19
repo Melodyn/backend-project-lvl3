@@ -2,7 +2,6 @@ version: "3.8"
 services:
   loader:
     build: .
-    user: $UID:$GID
     volumes:
     - .:/usr/src/app
     image: hexlet:loader
@@ -10,7 +9,6 @@ services:
 
   loader_dev:
     build: .
-    user: $UID:$GID
     volumes:
     - .:/usr/src/app
     - $HOME/asciinema-id:/root/.config/asciinema/install-id
