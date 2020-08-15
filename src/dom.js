@@ -1,6 +1,6 @@
 import fs from 'fs';
 import cheerio from 'cheerio';
-import { getDomain } from './pathToolkit.js';
+import { getDomain } from './utils.js';
 
 const l = console.log;
 

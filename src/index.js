@@ -1,10 +1,5 @@
-import fs from 'fs';
-import path from 'path';
 import axios from 'axios';
-import { urlToName } from './pathToolkit.js';
-
-const createFile = (dirpath, filename, content) => content
-  .pipe(fs.createWriteStream(path.resolve(dirpath, filename), { encoding: 'utf-8' }));
+import { urlToName, createFile } from './utils.js';
 
 const pageLoader = (url, outputDirPath) => axios.get(url.toString(), { responseType: 'stream' })
   .then(({ data }) => data)
