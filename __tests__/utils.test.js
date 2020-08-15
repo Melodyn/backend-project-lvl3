@@ -1,4 +1,4 @@
-import * as pathToolkit from '../src/pathToolkit.js';
+import * as pathToolkit from '../src/utils.js';
 
 const postfix = '_files';
 

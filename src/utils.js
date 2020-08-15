@@ -1,5 +1,5 @@
 import path from 'path';
-import { promises as fs } from 'fs';
+import fs, { promises as fsp } from 'fs';
 
 // urls
 
@@ -32,10 +32,10 @@ export const urlToName = (url, postfix = '') => {
 
 // files
 
-export const fileExists = (dirpath, filename) => fs.readdir(dirpath)
+export const fileExists = (dirpath, filename) => fsp.readdir(dirpath)
   .then((filenames) => filenames.includes(filename));
 
-export const readFile = (dirpath, filename) => fs.readFile(path.join(dirpath, filename), 'utf-8');
+export const readFile = (dirpath, filename) => fsp.readFile(path.join(dirpath, filename), 'utf-8');
 
 export const createFile = (dirpath, filename, content) => content
   .pipe(fs.createWriteStream(path.resolve(dirpath, filename), { encoding: 'utf-8' }));
