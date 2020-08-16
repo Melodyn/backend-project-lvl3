@@ -3,7 +3,7 @@ import path from 'path';
 import os from 'os';
 import nock from 'nock';
 import pageLoader from '../index.js';
-import * as pathToolkit from '../src/utils.js';
+import * as utils from '../src/utils.js';
 
 const baseUrl = 'https://hexlet.io';
 
@@ -46,7 +46,7 @@ nock.disableNetConnect();
 
 beforeAll(async () => {
   tmpDirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-  const promises = contents.map((content) => pathToolkit
+  const promises = contents.map((content) => utils
     .readFile('__fixtures__', content.filename)
     .then((data) => ({ ...content, data })));
   contents = await Promise.all(promises);
@@ -58,13 +58,13 @@ test.each(formats)('download %s', async (format) => {
   const { urlPath, filename, data } = contents.find((content) => content.format === format);
   const url = new URL(urlPath, baseUrl);
 
-  const fileAlreadyExist = await pathToolkit.fileExists(tmpDirPath, filename);
+  const fileAlreadyExist = await utils.fileExists(tmpDirPath, filename);
   expect(fileAlreadyExist).toBe(false);
 
   await pageLoader(url.toString(), tmpDirPath);
-  const fileWasCreated = await pathToolkit.fileExists(tmpDirPath, filename);
+  const fileWasCreated = await utils.fileExists(tmpDirPath, filename);
   expect(fileWasCreated).toBe(true);
 
-  const actualContent = await pathToolkit.readFile(tmpDirPath, filename);
+  const actualContent = await utils.readFile(tmpDirPath, filename);
   expect(actualContent).toBe(data);
 });

@@ -1,4 +1,4 @@
-import * as pathToolkit from '../src/utils.js';
+import * as utils from '../src/utils.js';
 
 const postfix = '_files';
 
@@ -21,10 +21,10 @@ const cases = [
 
 test.each(cases)('%s%s', (link, path, expectedDomain, expectedName, expectedFilename) => {
   const url = new URL(link);
-  const actualName = pathToolkit.urlToName(url);
-  const actualNameWithPostfix = pathToolkit.urlToName(url, postfix);
-  const actualDomain = pathToolkit.getDomain(url);
-  const actualFilename = pathToolkit.urlPathToFilename(path);
+  const actualName = utils.urlToName(url);
+  const actualNameWithPostfix = utils.urlToName(url, postfix);
+  const actualDomain = utils.getDomain(url);
+  const actualFilename = utils.urlPathToFilename(path);
 
   expect(actualName).toEqual(expectedName);
   expect(actualNameWithPostfix).toEqual(expectedName + postfix);
