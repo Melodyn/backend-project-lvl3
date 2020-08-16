@@ -6,29 +6,65 @@ import pageLoader from '../index.js';
 import * as pathToolkit from '../src/utils.js';
 
 const baseUrl = 'https://hexlet.io';
-const urlPath = '/courses';
-const url = new URL(urlPath, baseUrl);
-const expectedFilename = 'hexlet-io-courses.html';
+
+let contents = [
+  {
+    format: 'html',
+    urlPath: '/courses',
+    filename: 'hexlet-io-courses.html',
+  },
+  {
+    format: 'css',
+    urlPath: '/assets/application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
+    filename: path.join(
+      'hexlet-io-courses_files',
+      'assets-application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
+    ),
+  },
+  {
+    format: 'svg',
+    urlPath: '/assets/professions/frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
+    filename: path.join(
+      'hexlet-io-courses_files',
+      'assets-professions-frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
+    ),
+  },
+  {
+    format: 'js',
+    urlPath: '/packs/js/runtime-64630796b8e08f0f1f1d.js',
+    filename: path.join(
+      'hexlet-io-courses_files',
+      'packs-js-runtime-64630796b8e08f0f1f1d.js',
+    ),
+  },
+];
+const formats = contents.map(({ format }) => format);
 
 let tmpDirPath = '';
-let expectedContent = '';
 
 nock.disableNetConnect();
 
 beforeAll(async () => {
   tmpDirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-  expectedContent = await pathToolkit.readFile('__fixtures__', expectedFilename);
-  nock(baseUrl).get(urlPath).reply(200, expectedContent);
+  const promises = contents.map((content) => pathToolkit
+    .readFile('__fixtures__', content.filename)
+    .then((data) => ({ ...content, data })));
+  contents = await Promise.all(promises);
+
+  contents.forEach(({ urlPath, data }) => nock(baseUrl).get(urlPath).reply(200, data));
 });
 
-test('tmp dir', async () => {
-  const fileAlreadyExist = await pathToolkit.fileExists(tmpDirPath, expectedFilename);
+test.each(formats)('download %s', async (format) => {
+  const { urlPath, filename, data } = contents.find((content) => content.format === format);
+  const url = new URL(urlPath, baseUrl);
+
+  const fileAlreadyExist = await pathToolkit.fileExists(tmpDirPath, filename);
   expect(fileAlreadyExist).toBe(false);
 
   await pageLoader(url.toString(), tmpDirPath);
-  const fileWasCreated = await pathToolkit.fileExists(tmpDirPath, expectedFilename);
+  const fileWasCreated = await pathToolkit.fileExists(tmpDirPath, filename);
   expect(fileWasCreated).toBe(true);
 
-  const actualContent = await pathToolkit.readFile(tmpDirPath, expectedFilename);
-  expect(actualContent).toBe(expectedContent);
+  const actualContent = await pathToolkit.readFile(tmpDirPath, filename);
+  expect(actualContent).toBe(data);
 });
