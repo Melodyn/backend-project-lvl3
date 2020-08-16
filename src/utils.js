@@ -8,12 +8,13 @@ export const urlToFilename = (name, replacer = '-') => name.match(/\w*/gi)
   .join(replacer);
 
 export const getDomain = ({ hostname }) => {
-  const iter = (symbolCount, domain) => {
-    if (symbolCount < 0) return domain;
+  const iter = (symbolCount, domainAcc) => {
+    if (symbolCount < 0) return domainAcc;
     const currentSymbol = hostname[symbolCount];
-    return (currentSymbol === '.' && domain.includes(currentSymbol))
-      ? domain
-      : iter(symbolCount - 1, currentSymbol + domain);
+    const isSubDomain = ((currentSymbol === '.') && domainAcc.includes(currentSymbol));
+    return isSubDomain
+      ? domainAcc
+      : iter(symbolCount - 1, currentSymbol + domainAcc);
   };
   return iter(hostname.length - 1, '');
 };
