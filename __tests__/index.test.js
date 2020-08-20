@@ -13,30 +13,30 @@ let contents = [
     urlPath: '/courses',
     filename: 'hexlet-io-courses.html',
   },
-  {
-    format: 'css',
-    urlPath: '/assets/application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
-    filename: path.join(
-      'hexlet-io-courses_files',
-      'assets-application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
-    ),
-  },
-  {
-    format: 'svg',
-    urlPath: '/assets/professions/frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
-    filename: path.join(
-      'hexlet-io-courses_files',
-      'assets-professions-frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
-    ),
-  },
-  {
-    format: 'js',
-    urlPath: '/packs/js/runtime-64630796b8e08f0f1f1d.js',
-    filename: path.join(
-      'hexlet-io-courses_files',
-      'packs-js-runtime-64630796b8e08f0f1f1d.js',
-    ),
-  },
+  // {
+  //   format: 'css',
+  //   urlPath: '/assets/application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
+  //   filename: path.join(
+  //     'hexlet-io-courses_files',
+  //     'assets-application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
+  //   ),
+  // },
+  // {
+  //   format: 'svg',
+  //   urlPath: '/assets/professions/frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
+  //   filename: path.join(
+  //     'hexlet-io-courses_files',
+  //     'assets-professions-frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
+  //   ),
+  // },
+  // {
+  //   format: 'js',
+  //   urlPath: '/packs/js/runtime-64630796b8e08f0f1f1d.js',
+  //   filename: path.join(
+  //     'hexlet-io-courses_files',
+  //     'packs-js-runtime-64630796b8e08f0f1f1d.js',
+  //   ),
+  // },
 ];
 const formats = contents.map(({ format }) => format);
 

@@ -19,16 +19,12 @@ export const getDomain = ({ hostname }) => {
   return iter(hostname.length - 1, '');
 };
 
-export const urlPathToFilename = (pathname) => {
-  const { dir, name, ext } = path.parse(pathname);
-  const processedName = urlToFilename(path.join(dir, name));
-  return processedName + ext;
-};
-
-export const urlToName = (url, postfix = '') => {
+export const urlToName = (url, defaultType = '') => {
   const { hostname, pathname } = url;
-  const name = urlToFilename(path.join(hostname, pathname));
-  return name + postfix;
+  const { dir, name, ext } = path.parse(pathname);
+  const type = ext ? ext.slice(1) : defaultType;
+  const filename = urlToFilename(path.join(hostname, dir, name));
+  return { filename, type };
 };
 
 // files

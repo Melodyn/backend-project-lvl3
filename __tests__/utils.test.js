@@ -15,16 +15,17 @@ const cases = [
     '/courses/assets/application.css',
     'hexlet.io',
     'ru-hexlet-io-courses',
-    'courses-assets-application.css',
+    'courses-assets-application-css',
   ],
 ];
 
-test.each(cases)('%s%s', (link, path, expectedDomain, expectedName, expectedFilename) => {
+test.each(cases)('%s %s', (link, path, expectedDomain, expectedName, expectedFilename) => {
   const url = new URL(link);
-  const actualName = utils.urlToName(url);
-  const actualNameWithPostfix = utils.urlToName(url, postfix);
+  const { filename: actualName } = utils.urlToName(url);
+  const { filename, type } = utils.urlToName(url, postfix);
+  const actualNameWithPostfix = filename + type;
   const actualDomain = utils.getDomain(url);
-  const actualFilename = utils.urlPathToFilename(path);
+  const actualFilename = utils.urlToFilename(path);
 
   expect(actualName).toEqual(expectedName);
   expect(actualNameWithPostfix).toEqual(expectedName + postfix);
