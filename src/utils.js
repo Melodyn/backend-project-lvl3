@@ -1,5 +1,5 @@
 import path from 'path';
-import fs, { promises as fsp } from 'fs';
+import { promises as fsp } from 'fs';
 
 // urls
 
@@ -19,11 +19,10 @@ export const getDomain = ({ hostname }) => {
   return iter(hostname.length - 1, '');
 };
 
-export const urlToName = (url, defaultType = '') => {
-  const { hostname, pathname } = url;
-  const { dir, name, ext } = path.parse(pathname);
-  const type = ext ? ext.slice(1) : defaultType;
-  const filename = urlToFilename(path.join(hostname, dir, name));
+export const urlToName = (link) => {
+  const { dir, name, ext } = path.parse(link);
+  const filename = urlToFilename(path.join(dir, name));
+  const type = ext.slice(1);
   return { filename, type };
 };
 
@@ -34,5 +33,5 @@ export const fileExists = (dirpath, filename) => fsp.readdir(dirpath)
 
 export const readFile = (dirpath, filename) => fsp.readFile(path.join(dirpath, filename), 'utf-8');
 
-export const createFile = (dirpath, filename, content) => content
-  .pipe(fs.createWriteStream(path.resolve(dirpath, filename), { encoding: 'utf-8' }));
+export const createFile = (dirpath, filename, content) => fsp
+  .writeFile(path.resolve(dirpath, filename), content, { encoding: 'utf-8' });
