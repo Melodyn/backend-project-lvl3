@@ -5,16 +5,7 @@ import nock from 'nock';
 import pageLoader from '../index.js';
 import * as utils from '../src/utils.js';
 
-const baseUrl = 'https://hexlet.io';
-const domain = utils.getDomain(new URL(baseUrl));
-const scope = nock(new RegExp(`.*${domain}`)).persist();
-
-let contents = [
-  {
-    format: 'html',
-    urlPath: '/courses',
-    filename: 'hexlet-io-courses.html',
-  },
+let resources = [
   {
     format: 'css',
     urlPath: '/assets/application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
@@ -42,33 +33,44 @@ let contents = [
 ];
 
 let tmpDirPath = '';
+const baseUrl = 'https://hexlet.io';
+const domain = utils.getDomain(new URL(baseUrl));
+const formats = resources.map(({ format, filename }) => [format, filename]);
+const scope = nock(new RegExp(`.*${domain}`)).persist();
 
 nock.disableNetConnect();
 
 beforeAll(async () => {
   tmpDirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-  const promises = contents.map((content) => utils
-    .readFile('__fixtures__', content.filename)
-    .then((data) => ({
-      ...content,
-      data: content.format === 'html'
-        ? data
-        : `content from ${content.format}-file\n\nby url:${content.urlPath}`,
-    })));
-  contents = await Promise.all(promises);
 
-  contents.forEach(({ urlPath, data }) => scope.get(urlPath).reply(200, data));
+  const promises = resources.map((content) => utils
+    .readFile('__fixtures__/expected', content.filename)
+    .then((data) => ({ ...content, data })));
+  resources = await Promise.all(promises);
+  const inputHTML = await utils.readFile('__fixtures__', 'hexlet-io-courses.html');
+  const outputHTML = await utils.readFile('__fixtures__/expected', 'hexlet-io-courses.html');
+  scope.get('/courses').reply(200, inputHTML);
+
+  resources.forEach(({ urlPath, data }) => scope.get(urlPath).reply(200, data));
+  resources = [{
+    urlPath: '/courses',
+    format: 'html',
+    filename: 'hexlet-io-courses.html',
+    data: outputHTML,
+  }, ...resources];
 });
 
-test('download hexlet', async () => {
-  const { urlPath, filename, data } = contents.find((content) => content.format === 'html');
+test.each([['html', 'hexlet-io-courses.html'], ...formats])('download .%s-file to %s', async (format) => {
+  const { urlPath, filename, data } = resources.find((content) => content.format === format);
   const url = new URL(urlPath, baseUrl);
 
-  const fileAlreadyExist = await utils.fileExists(tmpDirPath, filename);
-  expect(fileAlreadyExist).toBe(false);
+  if (format === 'html') {
+    const fileAlreadyExist = await utils.fileExists(path.join(tmpDirPath, filename));
+    expect(fileAlreadyExist).toBe(false);
 
-  await pageLoader(url.toString(), tmpDirPath);
-  const fileWasCreated = await utils.fileExists(tmpDirPath, filename);
+    await pageLoader(url.toString(), tmpDirPath);
+  }
+  const fileWasCreated = await utils.fileExists(path.join(tmpDirPath, filename));
   expect(fileWasCreated).toBe(true);
 
   const actualContent = await utils.readFile(tmpDirPath, filename);

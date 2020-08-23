@@ -28,10 +28,19 @@ export const urlToName = (link) => {
 
 // files
 
-export const fileExists = (dirpath, filename) => fsp.readdir(dirpath)
-  .then((filenames) => filenames.includes(filename));
+export const fileExists = (filepath) => {
+  const dirname = path.dirname(filepath);
+  const filename = path.basename(filepath);
+  return fsp.readdir(dirname)
+    .then((filenames) => filenames.includes(filename));
+};
 
 export const readFile = (dirpath, filename) => fsp.readFile(path.join(dirpath, filename), 'utf-8');
 
 export const createFile = (dirpath, filename, content) => fsp
   .writeFile(path.resolve(dirpath, filename), content, { encoding: 'utf-8' });
+
+export const createDir = (...paths) => {
+  const dirpath = path.join(...paths);
+  return fsp.mkdir(dirpath).then(() => dirpath);
+};
