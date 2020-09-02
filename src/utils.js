@@ -19,10 +19,10 @@ export const getDomain = ({ hostname }) => {
   return iter(hostname.length - 1, '');
 };
 
-export const urlToName = (link) => {
+export const urlToName = (link, defaultType = 'html') => {
   const { dir, name, ext } = path.parse(link);
   const filename = urlToFilename(path.join(dir, name));
-  const type = ext.slice(1);
+  const type = ext.slice(1) || defaultType;
   return { filename, type };
 };
 

@@ -11,59 +11,90 @@ const tagAttrNameMap = {
   img: 'src',
 };
 
-const loadContent = (link) => axios
-  .get(link, { responseType: 'arraybuffer' })
-  .then(({ data }) => data);
+const contentTypeMap = {
+  page: 'page',
+  resource: 'resource',
+};
 
-const loadResources = (html, domain) => {
+const loadContent = (link, type) => axios
+  .get(link, { responseType: 'arraybuffer' })
+  .then(({ data }) => ({ type, link, data }));
+
+const getResourcesLinks = (html, domain) => {
   const $ = cheerio.load(html);
-  const links = Object.entries(tagAttrNameMap)
+
+  return Object.entries(tagAttrNameMap)
     .flatMap(([tagName, attrName]) => $(`${tagName}[${attrName}*="${domain}"]`)
       .map((index, element) => $(element).attr(attrName))
       .get());
-
-  const promises = links.map((link) => loadContent(link)
-    .then((data) => ({ link, data })));
-
-  return Promise.all(promises);
 };
 
 const pageLoader = (url, outputDirPath) => {
   const domain = getDomain(url);
   const mainLink = url.toString();
 
-  return loadContent(mainLink)
-    .then((html) => loadResources(html, domain)
-      .then((resources) => ({ html, resources })))
-    .then(({ html, resources }) => {
-      const { hostname, pathname } = new URL(mainLink);
-      const { filename: mainName } = urlToName(hostname + pathname);
-      const htmlFilename = `${mainName}.html`;
-      const resourcesDirname = `${mainName}_files`;
+  return loadContent(mainLink, contentTypeMap.page)
+    .then((page) => {
+      const resourcesLinks = getResourcesLinks(page.data, domain);
+      const promises = resourcesLinks.map((link) => loadContent(link, contentTypeMap.resource));
+      return Promise.all(promises).then((resources) => [page, ...resources]);
+    })
+    .then((pages) => {
+      const { link: pageLink } = pages.find(({ type }) => type === contentTypeMap.page);
+      const { hostname, pathname } = new URL(pageLink);
+      const { filename, type: ext } = urlToName(hostname + pathname);
+      const resourcesDirName = `${filename}_files`;
 
+      return pages.flatMap(({ type, link, data }) => {
+        switch (type) {
+          case contentTypeMap.page:
+            return {
+              type,
+              link,
+              dirname: '',
+              filename: `${filename}.${ext}`,
+              data,
+            };
+          case contentTypeMap.resource: {
+            const { pathname: linkPath } = new URL(link);
+            const { filename: name, type: extension } = urlToName(linkPath);
+
+            return {
+              type,
+              link,
+              dirname: resourcesDirName,
+              filename: `${name}.${extension}`,
+              data,
+            };
+          }
+          default:
+            throw new Error(`Unknown type ${type}`);
+        }
+      });
+    })
+    .then((pages) => {
+      const [{ data, ...rest }, ...resources] = pages;
+      const updatedData = resources.reduce(
+        (html, { link, dirname, filename }) => html.replace(link, path.join(dirname, filename)),
+        data.toString(),
+      );
+      return [{ data: updatedData, ...rest }, ...resources];
+    })
+    .then((pages) => {
+      const { dirname: resourcesDirname } = pages
+        .find(({ type }) => type === contentTypeMap.resource);
       return createDir(outputDirPath, resourcesDirname)
-        .then((outDirPath) => {
-          const promises = resources.map(({ link, data }) => {
-            const { filename: name, type } = urlToName(new URL(link).pathname);
-            const filename = `${name}.${type}`;
-            return createFile(outDirPath, filename, data);
-          });
-          return Promise.all(promises);
-        })
-        .then(() => {
-          const $ = cheerio.load(html);
-          Object.entries(tagAttrNameMap)
-            .flatMap(([tagName, attrName]) => $(`${tagName}[${attrName}*="${domain}"]`)
-              .map((index, element) => {
-                const link = $(element).attr(attrName);
-                const { filename: name, type } = urlToName(new URL(link).pathname);
-                const filename = `${name}.${type}`;
-                const filepath = path.join(resourcesDirname, filename);
-                return $(element).attr(attrName, filepath);
-              }));
-          return $.html();
-        })
-        .then((updatedHTML) => createFile(outputDirPath, htmlFilename, updatedHTML));
+        .then((outDirPath) => pages.map(({ type, filename, data }) => {
+          switch (type) {
+            case contentTypeMap.page:
+              return createFile(outputDirPath, filename, data);
+            case contentTypeMap.resource:
+              return createFile(outDirPath, filename, data);
+            default:
+              throw new Error(`Unknown type ${type}`);
+          }
+        }))
+        .then((promises) => Promise.all(promises));
     });
 };
 
