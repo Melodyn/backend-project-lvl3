@@ -35,3 +35,4 @@
 ## Демонстрация
 
 * step 1: https://asciinema.org/a/347951
+* step 2: https://asciinema.org/a/357674

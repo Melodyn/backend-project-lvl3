@@ -2,6 +2,7 @@ import path from 'path';
 import { promises as fsp } from 'fs';
 import axios from 'axios';
 import cheerio from 'cheerio';
+import 'axios-debug-log';
 
 // pages
 

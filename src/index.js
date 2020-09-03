@@ -1,3 +1,4 @@
+import debug from 'debug';
 import {
   buildPath,
   createFile,
@@ -7,6 +8,8 @@ import {
   loadContent,
   getResourcesLinks,
 } from './utils.js';
+
+debug('page-loader');
 
 const pageLoader = (url, outputDirPath) => loadContent(url.toString())
   .then((page) => {
