@@ -1,5 +1,28 @@
 import path from 'path';
 import { promises as fsp } from 'fs';
+import axios from 'axios';
+import cheerio from 'cheerio';
+
+// pages
+
+export const loadContent = (link) => axios
+  .get(link, { responseType: 'arraybuffer' })
+  .then(({ data }) => ({ link, data }));
+
+export const getResourcesLinks = (html, domain) => {
+  const tagAttrNameMap = {
+    link: 'href',
+    script: 'src',
+    img: 'src',
+  };
+
+  const $ = cheerio.load(html);
+
+  return Object.entries(tagAttrNameMap)
+    .flatMap(([tagName, attrName]) => $(`${tagName}[${attrName}*="${domain}"]`)
+      .map((index, element) => $(element).attr(attrName))
+      .get());
+};
 
 // urls
 
@@ -27,6 +50,8 @@ export const urlToName = (link, defaultType = 'html') => {
 };
 
 // files
+
+export const buildPath = path.join;
 
 export const fileExists = (filepath) => {
   const dirname = path.dirname(filepath);
