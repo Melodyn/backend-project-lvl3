@@ -26,6 +26,8 @@ test_debug_nock:
 	DEBUG=nock.* npm test -s
 test_debug_axios:
 	DEBUG=axios npm test -s
+test_debug_app:
+	DEBUG=page-loader npm test -s
 
 asciinema:
 	asciinema rec

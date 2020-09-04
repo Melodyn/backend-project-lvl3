@@ -5,6 +5,10 @@ import nock from 'nock';
 import pageLoader from '../index.js';
 import * as utils from '../src/utils.js';
 
+const buildFixturesPath = (...paths) => path.join('__fixtures__', ...paths);
+
+let tmpDirPath = '';
+let expectedPageContent = '';
 let resources = [
   {
     format: 'css',
@@ -32,10 +36,12 @@ let resources = [
   },
 ];
 
-let tmpDirPath = '';
+const pageFilename = 'hexlet-io-courses.html';
 const baseUrl = 'https://hexlet.io';
-const domain = utils.getDomain(new URL(baseUrl));
-const formats = resources.map(({ format, filename }) => [format, filename]);
+const pagePath = '/courses';
+const pageUrl = new URL(pagePath, baseUrl);
+const domain = utils.getDomain(pageUrl);
+const formats = resources.map(({ format }) => [format]);
 const scope = nock(new RegExp(`.*${domain}`)).persist();
 
 nock.disableNetConnect();
@@ -43,36 +49,51 @@ nock.disableNetConnect();
 beforeAll(async () => {
   tmpDirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 
-  const promises = resources.map((content) => utils
-    .readFile('__fixtures__/expected', content.filename)
-    .then((data) => ({ ...content, data })));
-  resources = await Promise.all(promises);
-  const inputHTML = await utils.readFile('__fixtures__', 'hexlet-io-courses.html');
-  const outputHTML = await utils.readFile('__fixtures__/expected', 'hexlet-io-courses.html');
-  scope.get('/courses').reply(200, inputHTML);
+  const sourcePageContent = await utils.readFile(buildFixturesPath(), pageFilename);
+  const promises = resources.map((info) => utils
+    .readFile(buildFixturesPath('expected'), info.filename)
+    .then((data) => ({ ...info, data })));
 
+  expectedPageContent = await utils.readFile(buildFixturesPath('expected'), pageFilename);
+  resources = await Promise.all(promises);
+
+  scope.get(pagePath).reply(200, sourcePageContent);
   resources.forEach(({ urlPath, data }) => scope.get(urlPath).reply(200, data));
-  resources = [{
-    urlPath: '/courses',
-    format: 'html',
-    filename: 'hexlet-io-courses.html',
-    data: outputHTML,
-  }, ...resources];
 });
 
-test.each([['html', 'hexlet-io-courses.html'], ...formats])('download .%s-file to %s', async (format) => {
-  const { urlPath, filename, data } = resources.find((content) => content.format === format);
-  const url = new URL(urlPath, baseUrl);
-
-  if (format === 'html') {
-    const fileAlreadyExist = await utils.fileExists(path.join(tmpDirPath, filename));
+describe('negative cases', () => {
+  test('load page', async () => {
+    const fileAlreadyExist = await utils.fileExists(path.join(tmpDirPath, pageFilename));
     expect(fileAlreadyExist).toBe(false);
 
-    await pageLoader(url.toString(), tmpDirPath);
-  }
-  const fileWasCreated = await utils.fileExists(path.join(tmpDirPath, filename));
-  expect(fileWasCreated).toBe(true);
+    await expect(pageLoader(baseUrl, tmpDirPath)).rejects.toThrow();
 
-  const actualContent = await utils.readFile(tmpDirPath, filename);
-  expect(actualContent).toBe(data);
+    const fileWasCreated = await utils.fileExists(path.join(tmpDirPath, pageFilename));
+    expect(fileWasCreated).toBe(false);
+  });
+});
+
+describe('positive cases', () => {
+  test('load page', async () => {
+    const fileAlreadyExist = await utils.fileExists(path.join(tmpDirPath, pageFilename));
+    expect(fileAlreadyExist).toBe(false);
+
+    await pageLoader(pageUrl.toString(), tmpDirPath);
+
+    const fileWasCreated = await utils.fileExists(path.join(tmpDirPath, pageFilename));
+    expect(fileWasCreated).toBe(true);
+
+    const actualContent = await utils.readFile(tmpDirPath, pageFilename);
+    expect(actualContent).toBe(expectedPageContent);
+  });
+
+  test.each(formats)('check .%s-resource', async (format) => {
+    const { filename, data } = resources.find((content) => content.format === format);
+
+    const fileWasCreated = await utils.fileExists(path.join(tmpDirPath, filename));
+    expect(fileWasCreated).toBe(true);
+
+    const actualContent = await utils.readFile(tmpDirPath, filename);
+    expect(actualContent).toBe(data);
+  });
 });
