@@ -29,7 +29,7 @@ test_debug_axios:
 test_debug_app:
 	DEBUG=page-loader npm test -s
 
-asciinema:
+rec:
 	asciinema rec
 publish:
 	npm publish --dry-run

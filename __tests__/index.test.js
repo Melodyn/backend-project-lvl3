@@ -62,14 +62,38 @@ beforeAll(async () => {
 });
 
 describe('negative cases', () => {
-  test('load page', async () => {
+  test('load page: no response', async () => {
     const fileAlreadyExist = await utils.fileExists(path.join(tmpDirPath, pageFilename));
     expect(fileAlreadyExist).toBe(false);
 
-    await expect(pageLoader(baseUrl, tmpDirPath)).rejects.toThrow();
+    await expect(pageLoader(baseUrl, tmpDirPath)).rejects.toThrow(`Resource ${baseUrl}/ did not return a response`);
 
     const fileWasCreated = await utils.fileExists(path.join(tmpDirPath, pageFilename));
     expect(fileWasCreated).toBe(false);
+  });
+
+  test('load page: status codes', async () => {
+    scope.get('/404').reply(404, '');
+    await expect(pageLoader(new URL('/404', baseUrl).toString(), tmpDirPath))
+      .rejects.toThrow(`Request to ${baseUrl}/404 failed with status code 404`);
+
+    scope.get('/500').reply(500, '');
+    await expect(pageLoader(new URL('/500', baseUrl).toString(), tmpDirPath))
+      .rejects.toThrow(`Request to ${baseUrl}/500 failed with status code 500`);
+  });
+
+  test('load page: file system errors', async () => {
+    const rootDirPath = '/sys';
+    await expect(pageLoader(pageUrl.toString(), rootDirPath))
+      .rejects.toThrow(`No access to write in ${rootDirPath}`);
+
+    const filepath = buildFixturesPath(pageFilename);
+    await expect(pageLoader(pageUrl.toString(), filepath))
+      .rejects.toThrow(`${filepath} is not a directory`);
+
+    const notExistsPath = buildFixturesPath('notExistsPath');
+    await expect(pageLoader(pageUrl.toString(), notExistsPath))
+      .rejects.toThrow(`${notExistsPath} not exists`);
   });
 });
 

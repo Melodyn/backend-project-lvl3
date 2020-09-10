@@ -1,14 +1,25 @@
 import path from 'path';
-import { promises as fsp } from 'fs';
+import fs, { promises as fsp } from 'fs';
 import axios from 'axios';
 import cheerio from 'cheerio';
 import 'axios-debug-log';
 
 // pages
 
-export const loadContent = (link) => axios
-  .get(link, { responseType: 'arraybuffer' })
-  .then(({ data }) => ({ link, data }));
+export const loadContent = (link) => {
+  const generateRequestError = (statusCode) => (
+    new Error(`Request to ${link} failed with status code ${statusCode}`)
+  );
+  return axios.get(link, { responseType: 'arraybuffer' })
+    .catch(({ response }) => {
+      if (!response) throw new Error(`Resource ${link} did not return a response`);
+      throw generateRequestError(response.status);
+    })
+    .then(({ data, status }) => {
+      if (status !== 200) throw generateRequestError(status);
+      return { link, data };
+    });
+};
 
 export const getResourcesLinks = (html, domain) => {
   const tagAttrNameMap = {
@@ -69,4 +80,18 @@ export const createFile = (dirpath, filename, content) => fsp
 export const createDir = (...paths) => {
   const dirpath = path.join(...paths);
   return fsp.mkdir(dirpath).then(() => dirpath);
+};
+
+export const checkWriteAccess = (dirpath) => {
+  const resultGenerator = (errorMessage = '') => ({ accessIsAllow: errorMessage === '', errorMessage });
+  return fsp.stat(dirpath)
+    .then((stats) => {
+      if (!stats.isDirectory()) {
+        return resultGenerator(`${dirpath} is not a directory`);
+      }
+      return fsp.access(dirpath, fs.constants.W_OK)
+        .then(() => resultGenerator())
+        .catch(() => resultGenerator(`No access to write in ${dirpath}`));
+    })
+    .catch(() => resultGenerator(`${dirpath} not exists`));
 };
