@@ -82,16 +82,16 @@ export const createDir = (...paths) => {
   return fsp.mkdir(dirpath).then(() => dirpath);
 };
 
-export const checkWriteAccess = (dirpath) => {
-  const resultGenerator = (errorMessage = '') => ({ accessIsAllow: errorMessage === '', errorMessage });
-  return fsp.stat(dirpath)
-    .then((stats) => {
-      if (!stats.isDirectory()) {
-        return resultGenerator(`${dirpath} is not a directory`);
-      }
-      return fsp.access(dirpath, fs.constants.W_OK)
-        .then(() => resultGenerator())
-        .catch(() => resultGenerator(`No access to write in ${dirpath}`));
-    })
-    .catch(() => resultGenerator(`${dirpath} not exists`));
-};
+export const checkWriteAccess = (dirpath) => fsp.stat(dirpath)
+  .catch(() => {
+    throw new Error(`${dirpath} not exists`);
+  })
+  .then((stats) => {
+    if (!stats.isDirectory()) {
+      throw new Error(`${dirpath} is not a directory`);
+    }
+    return fsp.access(dirpath, fs.constants.W_OK)
+      .catch(() => {
+        throw new Error(`No access to write in ${dirpath}`);
+      });
+  });

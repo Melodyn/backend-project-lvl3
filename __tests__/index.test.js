@@ -2,10 +2,11 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import nock from 'nock';
-import pageLoader from '../index.js';
+import loader from '../index.js';
 import * as utils from '../src/utils.js';
 
 const buildFixturesPath = (...paths) => path.join('__fixtures__', ...paths);
+const pageLoader = (...params) => loader(...params, 'silent');
 
 let tmpDirPath = '';
 let expectedPageContent = '';
