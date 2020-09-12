@@ -31,8 +31,7 @@
     "cheerio": "^1.0.0-rc.3",
     "commander": "^5.1.0",
     "debug": "^4.1.1",
-    "listr": "^0.14.3",
-    "lodash": "^4.17.19"
+    "listr": "^0.14.3"
   },
   "devDependencies": {
     "eslint": "^7.4.0",
