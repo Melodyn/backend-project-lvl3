@@ -38,3 +38,4 @@
 * step 2: https://asciinema.org/a/357674
 * step 3: https://asciinema.org/a/357867
 * step 4: https://asciinema.org/a/359012
+* step 5: https://asciinema.org/a/359325
