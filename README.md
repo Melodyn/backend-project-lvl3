@@ -1,6 +1,8 @@
 # Hexlet: "Загрузчик страниц"
 
 [![Github Actions](../../workflows/Node.js%20CI/badge.svg)](../../actions)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/90a3516f1a2569997c5b/test_coverage)](https://codeclimate.com/github/Melodyn/backend-project-lvl3/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/90a3516f1a2569997c5b/maintainability)](https://codeclimate.com/github/Melodyn/backend-project-lvl3/maintainability)
 
 Подробнее: https://ru.hexlet.io/projects/4/members/9839
 
