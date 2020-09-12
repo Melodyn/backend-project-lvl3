@@ -6,29 +6,27 @@ import 'axios-debug-log';
 
 // pages
 
-export const loadContent = (link) => {
-  const generateRequestError = (statusCode) => (
-    new Error(`Request to ${link} failed with status code ${statusCode}`)
-  );
-  return axios.get(link, { responseType: 'arraybuffer' })
-    .catch(({ response }) => {
-      if (!response) throw new Error(`Resource ${link} did not return a response`);
-      throw generateRequestError(response.status);
-    })
-    .then(({ data, status }) => {
-      if (status !== 200) throw generateRequestError(status);
-      return { link, data };
-    });
-};
+export const loadContent = (link) => axios.get(link, { responseType: 'arraybuffer' })
+  .catch(({ response }) => {
+    if (!response) {
+      throw new Error(`Resource ${link} did not return a response`);
+    }
+    throw new Error(`Request to ${link} failed with status code ${response.status}`);
+  })
+  .then(({ data, status }) => {
+    if (status !== 200) {
+      throw new Error(`Request to ${link} failed with status code ${status}`);
+    }
+    return { link, data };
+  });
 
 export const getResourcesLinks = (html, domain) => {
+  const $ = cheerio.load(html);
   const tagAttrNameMap = {
     link: 'href',
     script: 'src',
     img: 'src',
   };
-
-  const $ = cheerio.load(html);
 
   return Object.entries(tagAttrNameMap)
     .flatMap(([tagName, attrName]) => $(`${tagName}[${attrName}*="${domain}"]`)
@@ -82,7 +80,7 @@ export const createDir = (...paths) => {
   return fsp.mkdir(dirpath).then(() => dirpath);
 };
 
-export const checkWriteAccess = (dirpath) => fsp.stat(dirpath)
+export const checkDirectory = (dirpath) => fsp.stat(dirpath)
   .catch(() => {
     throw new Error(`${dirpath} not exists`);
   })

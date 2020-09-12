@@ -8,7 +8,7 @@ import {
   urlToName,
   loadContent,
   getResourcesLinks,
-  checkWriteAccess,
+  checkDirectory,
 } from './utils.js';
 
 const log = debug('page-loader');
@@ -25,9 +25,9 @@ const pageLoader = (url, outputDirPath, progressBar) => new Listr([], { renderer
   .addTask('Check output directory',
     () => {
       log('Input data', { url: url.toString(), outputDirPath });
-      return checkWriteAccess(outputDirPath);
+      return checkDirectory(outputDirPath);
     })
-  .addTask(`Load page ${url.toString()}`, () => loadContent(url.toString(), log))
+  .addTask(`Load page ${url.toString()}`, () => loadContent(url.toString()))
   .addTask('Load page resources',
     (page) => {
       const resourcesLinks = getResourcesLinks(page.data, getDomain(url));
