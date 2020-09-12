@@ -1,12 +1,20 @@
-import { promises as fs } from 'fs';
+import { promises as fsp } from 'fs';
 import path from 'path';
 import os from 'os';
 import nock from 'nock';
 import loader from '../index.js';
-import * as utils from '../src/utils.js';
+import { getDomain } from '../src/utils.js';
+
+const pageLoader = (url, outputDirPath) => loader(url, outputDirPath, 'silent');
 
 const buildFixturesPath = (...paths) => path.join('__fixtures__', ...paths);
-const pageLoader = (...params) => loader(...params, 'silent');
+const readFile = (dirpath, filename) => fsp.readFile(path.join(dirpath, filename), 'utf-8');
+const fileExists = (filepath) => {
+  const dirname = path.dirname(filepath);
+  const filename = path.basename(filepath);
+  return fsp.readdir(dirname)
+    .then((filenames) => filenames.includes(filename));
+};
 
 let tmpDirPath = '';
 let expectedPageContent = '';
@@ -41,21 +49,20 @@ const pageFilename = 'hexlet-io-courses.html';
 const baseUrl = 'https://hexlet.io';
 const pagePath = '/courses';
 const pageUrl = new URL(pagePath, baseUrl);
-const domain = utils.getDomain(pageUrl);
-const formats = resources.map(({ format }) => [format]);
+const domain = getDomain(pageUrl);
+const formats = resources.map(({ format }) => format);
 const scope = nock(new RegExp(`.*${domain}`)).persist();
 
 nock.disableNetConnect();
 
 beforeAll(async () => {
-  tmpDirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+  tmpDirPath = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 
-  const sourcePageContent = await utils.readFile(buildFixturesPath(), pageFilename);
-  const promises = resources.map((info) => utils
-    .readFile(buildFixturesPath('expected'), info.filename)
+  const sourcePageContent = await readFile(buildFixturesPath('.'), pageFilename);
+  const promises = resources.map((info) => readFile(buildFixturesPath('expected'), info.filename)
     .then((data) => ({ ...info, data })));
 
-  expectedPageContent = await utils.readFile(buildFixturesPath('expected'), pageFilename);
+  expectedPageContent = await readFile(buildFixturesPath('expected'), pageFilename);
   resources = await Promise.all(promises);
 
   scope.get(pagePath).reply(200, sourcePageContent);
@@ -64,23 +71,19 @@ beforeAll(async () => {
 
 describe('negative cases', () => {
   test('load page: no response', async () => {
-    const fileAlreadyExist = await utils.fileExists(path.join(tmpDirPath, pageFilename));
+    const fileAlreadyExist = await fileExists(path.join(tmpDirPath, pageFilename));
     expect(fileAlreadyExist).toBe(false);
 
     await expect(pageLoader(baseUrl, tmpDirPath)).rejects.toThrow(`Resource ${baseUrl}/ did not return a response`);
 
-    const fileWasCreated = await utils.fileExists(path.join(tmpDirPath, pageFilename));
+    const fileWasCreated = await fileExists(path.join(tmpDirPath, pageFilename));
     expect(fileWasCreated).toBe(false);
   });
 
-  test('load page: status codes', async () => {
-    scope.get('/404').reply(404, '');
-    await expect(pageLoader(new URL('/404', baseUrl).toString(), tmpDirPath))
-      .rejects.toThrow(`Request to ${baseUrl}/404 failed with status code 404`);
-
-    scope.get('/500').reply(500, '');
-    await expect(pageLoader(new URL('/500', baseUrl).toString(), tmpDirPath))
-      .rejects.toThrow(`Request to ${baseUrl}/500 failed with status code 500`);
+  test.each([404, 500])('load page: status code %s', async (code) => {
+    scope.get(`/${code}`).reply(code, '');
+    await expect(pageLoader(new URL(`/${code}`, baseUrl).toString(), tmpDirPath))
+      .rejects.toThrow(`Request to ${baseUrl}/${code} failed with status code ${code}`);
   });
 
   test('load page: file system errors', async () => {
@@ -100,25 +103,25 @@ describe('negative cases', () => {
 
 describe('positive cases', () => {
   test('load page', async () => {
-    const fileAlreadyExist = await utils.fileExists(path.join(tmpDirPath, pageFilename));
+    const fileAlreadyExist = await fileExists(path.join(tmpDirPath, pageFilename));
     expect(fileAlreadyExist).toBe(false);
 
     await pageLoader(pageUrl.toString(), tmpDirPath);
 
-    const fileWasCreated = await utils.fileExists(path.join(tmpDirPath, pageFilename));
+    const fileWasCreated = await fileExists(path.join(tmpDirPath, pageFilename));
     expect(fileWasCreated).toBe(true);
 
-    const actualContent = await utils.readFile(tmpDirPath, pageFilename);
+    const actualContent = await readFile(tmpDirPath, pageFilename);
     expect(actualContent).toBe(expectedPageContent);
   });
 
   test.each(formats)('check .%s-resource', async (format) => {
     const { filename, data } = resources.find((content) => content.format === format);
 
-    const fileWasCreated = await utils.fileExists(path.join(tmpDirPath, filename));
+    const fileWasCreated = await fileExists(path.join(tmpDirPath, filename));
     expect(fileWasCreated).toBe(true);
 
-    const actualContent = await utils.readFile(tmpDirPath, filename);
+    const actualContent = await readFile(tmpDirPath, filename);
     expect(actualContent).toBe(data);
   });
 });

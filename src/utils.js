@@ -36,10 +36,6 @@ export const getResourcesLinks = (html, domain) => {
 
 // urls
 
-export const urlToFilename = (name, replacer = '-') => name.match(/\w*/gi)
-  .filter((x) => x)
-  .join(replacer);
-
 export const getDomain = ({ hostname }) => {
   const iter = (symbolCount, domainAcc) => {
     if (symbolCount < 0) return domainAcc;
@@ -53,6 +49,10 @@ export const getDomain = ({ hostname }) => {
 };
 
 export const urlToName = (link, defaultType = 'html') => {
+  const urlToFilename = (name, replacer = '-') => name.match(/\w*/gi)
+    .filter((x) => x)
+    .join(replacer);
+
   const { dir, name, ext } = path.parse(link);
   const filename = urlToFilename(path.join(dir, name));
   const type = ext.slice(1) || defaultType;
@@ -63,22 +63,10 @@ export const urlToName = (link, defaultType = 'html') => {
 
 export const buildPath = path.join;
 
-export const fileExists = (filepath) => {
-  const dirname = path.dirname(filepath);
-  const filename = path.basename(filepath);
-  return fsp.readdir(dirname)
-    .then((filenames) => filenames.includes(filename));
-};
+export const createFile = (filepath, content) => fsp
+  .writeFile(filepath, content, { encoding: 'utf-8' });
 
-export const readFile = (dirpath, filename) => fsp.readFile(path.join(dirpath, filename), 'utf-8');
-
-export const createFile = (dirpath, filename, content) => fsp
-  .writeFile(path.resolve(dirpath, filename), content, { encoding: 'utf-8' });
-
-export const createDir = (...paths) => {
-  const dirpath = path.join(...paths);
-  return fsp.mkdir(dirpath).then(() => dirpath);
-};
+export const createDir = (dirpath) => fsp.mkdir(dirpath).then(() => dirpath);
 
 export const checkDirectory = (dirpath) => fsp.stat(dirpath)
   .catch(() => {

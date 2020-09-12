@@ -1,13 +1,13 @@
 import debug from 'debug';
 import Listr from 'listr';
 import {
-  buildPath,
-  createFile,
-  createDir,
   getDomain,
   urlToName,
   loadContent,
   getResourcesLinks,
+  buildPath,
+  createDir,
+  createFile,
   checkDirectory,
 } from './utils.js';
 
@@ -75,16 +75,16 @@ const pageLoader = (url, outputDirPath, progressBar) => new Listr([], { renderer
   .addTask('Create resources directory',
     ({ resourcesDirName, ...rest }) => {
       log('Create resources directory', { outputDirPath, resourcesDirName });
-      return createDir(outputDirPath, resourcesDirName)
+      return createDir(buildPath(outputDirPath, resourcesDirName))
         .then((resourcesDirPath) => ({ ...rest, resourcesDirPath }));
     })
   .addTask(`Save page and resources to "${outputDirPath}"`,
     ({ page, resources, resourcesDirPath }) => {
       log('Save page', { outputDirPath, filename: page.filename });
       log(`Save ${resources.length} resources`, { resourcesDirPath });
-      const pagePromise = createFile(outputDirPath, page.filename, page.data);
+      const pagePromise = createFile(buildPath(outputDirPath, page.filename), page.data);
       const resourcePromises = resources
-        .map(({ filename, data }) => createFile(resourcesDirPath, filename, data));
+        .map(({ filename, data }) => createFile(buildPath(resourcesDirPath, filename), data));
 
       return Promise.all([pagePromise, ...resourcePromises]);
     })
