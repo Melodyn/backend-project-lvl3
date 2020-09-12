@@ -22,6 +22,8 @@ test:
 	npm test -s
 test_dev:
 	npm test -s -- --watchAll
+test_coverage:
+	npm test -s -- --coverage
 test_debug_nock:
 	DEBUG=nock.* npm test -s
 test_debug_axios:
