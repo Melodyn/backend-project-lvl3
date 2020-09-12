@@ -28,7 +28,7 @@
 
 * `make container_start` поднять контейнер с приложением
 * `make install` установить приложение
-* `gendiff -h`
+* `page-loader -h`
 
 Дополнительно:
 * `make lint` проверка линтером
