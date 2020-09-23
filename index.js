@@ -3,5 +3,5 @@ import pageLoader from './src/index.js';
 export default (
   url,
   outputDirPath = process.cwd(),
-  progressBar = 'default',
+  progressBar = 'silent',
 ) => pageLoader(new URL(url), outputDirPath, progressBar);

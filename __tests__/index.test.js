@@ -3,7 +3,6 @@ import path from 'path';
 import os from 'os';
 import nock from 'nock';
 import loader from '../index.js';
-import { getDomain } from '../src/utils.js';
 
 const pageLoader = (url, outputDirPath) => loader(url, outputDirPath, 'silent');
 
@@ -16,6 +15,12 @@ const fileExists = (filepath) => {
     .then((filenames) => filenames.includes(filename));
 };
 
+const pageDirname = 'hexlet-io-courses_files';
+const pageFilename = 'hexlet-io-courses.html';
+const baseUrl = 'https://hexlet.io';
+const pagePath = '/courses';
+const pageUrl = new URL(pagePath, baseUrl);
+
 let tmpDirPath = '';
 let expectedPageContent = '';
 let resources = [
@@ -23,7 +28,7 @@ let resources = [
     format: 'css',
     urlPath: '/assets/application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
     filename: path.join(
-      'hexlet-io-courses_files',
+      pageDirname,
       'assets-application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
     ),
   },
@@ -31,7 +36,7 @@ let resources = [
     format: 'svg',
     urlPath: '/assets/professions/frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
     filename: path.join(
-      'hexlet-io-courses_files',
+      pageDirname,
       'assets-professions-frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
     ),
   },
@@ -39,19 +44,22 @@ let resources = [
     format: 'js',
     urlPath: '/packs/js/runtime-64630796b8e08f0f1f1d.js',
     filename: path.join(
-      'hexlet-io-courses_files',
+      pageDirname,
       'packs-js-runtime-64630796b8e08f0f1f1d.js',
+    ),
+  },
+  {
+    format: 'html',
+    urlPath: '/courses',
+    filename: path.join(
+      pageDirname,
+      'courses.html',
     ),
   },
 ];
 
-const pageFilename = 'hexlet-io-courses.html';
-const baseUrl = 'https://hexlet.io';
-const pagePath = '/courses';
-const pageUrl = new URL(pagePath, baseUrl);
-const domain = getDomain(pageUrl);
 const formats = resources.map(({ format }) => format);
-const scope = nock(new RegExp(`.*${domain}`)).persist();
+const scope = nock(baseUrl).persist();
 
 nock.disableNetConnect();
 
@@ -74,7 +82,11 @@ describe('negative cases', () => {
     const fileAlreadyExist = await fileExists(path.join(tmpDirPath, pageFilename));
     expect(fileAlreadyExist).toBe(false);
 
-    await expect(pageLoader(baseUrl, tmpDirPath)).rejects.toThrow(`Resource ${baseUrl}/ did not return a response`);
+    const invalidBaseUrl = baseUrl.replace('x', '');
+    const expectedError = `getaddrinfo ENOTFOUND ${invalidBaseUrl}`;
+    nock(invalidBaseUrl).persist().get('/').replyWithError(expectedError);
+    await expect(pageLoader(invalidBaseUrl, tmpDirPath))
+      .rejects.toThrow(expectedError);
 
     const fileWasCreated = await fileExists(path.join(tmpDirPath, pageFilename));
     expect(fileWasCreated).toBe(false);
@@ -83,21 +95,21 @@ describe('negative cases', () => {
   test.each([404, 500])('load page: status code %s', async (code) => {
     scope.get(`/${code}`).reply(code, '');
     await expect(pageLoader(new URL(`/${code}`, baseUrl).toString(), tmpDirPath))
-      .rejects.toThrow(`Request to ${baseUrl}/${code} failed with status code ${code}`);
+      .rejects.toThrow(`Request failed with status code ${code}`);
   });
 
   test('load page: file system errors', async () => {
     const rootDirPath = '/sys';
     await expect(pageLoader(pageUrl.toString(), rootDirPath))
-      .rejects.toThrow(`No access to write in ${rootDirPath}`);
+      .rejects.toThrow(`EACCES: permission denied, mkdir '${rootDirPath}/${pageDirname}'`);
 
     const filepath = buildFixturesPath(pageFilename);
     await expect(pageLoader(pageUrl.toString(), filepath))
-      .rejects.toThrow(`${filepath} is not a directory`);
+      .rejects.toThrow(`ENOTDIR: not a directory, mkdir '${filepath}/${pageDirname}'`);
 
     const notExistsPath = buildFixturesPath('notExistsPath');
     await expect(pageLoader(pageUrl.toString(), notExistsPath))
-      .rejects.toThrow(`${notExistsPath} not exists`);
+      .rejects.toThrow(`ENOENT: no such file or directory, mkdir '${notExistsPath}/${pageDirname}'`);
   });
 });
 
@@ -112,7 +124,7 @@ describe('positive cases', () => {
     expect(fileWasCreated).toBe(true);
 
     const actualContent = await readFile(tmpDirPath, pageFilename);
-    expect(actualContent).toBe(expectedPageContent);
+    expect(actualContent).toBe(expectedPageContent.trim());
   });
 
   test.each(formats)('check .%s-resource', async (format) => {
