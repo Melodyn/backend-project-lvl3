@@ -1,6 +1,5 @@
 import debug from 'debug';
 import Listr from 'listr';
-import { promises as fs } from 'fs';
 import {
   urlToFilename,
   urlToDirname,
