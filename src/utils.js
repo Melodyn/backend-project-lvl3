@@ -19,6 +19,7 @@ const urlToName = (link, defaultFormat = 'html', type = 'resource') => {
 
     return [slug, format];
   }
+
   const slug = processName(path.join(dir, name, ext));
 
   return [slug, defaultFormat];
@@ -50,7 +51,7 @@ export const processAssets = (html, assetsDirname, origin) => {
       return localAssets.map((element) => {
         const urlPath = $(element).attr(attrName);
         const url = new URL(urlPath, origin);
-        const filepath = path.join(assetsDirname, urlToFilename(url.pathname));
+        const filepath = path.join(assetsDirname, urlToFilename(url.hostname + url.pathname));
         $(element).attr(attrName, filepath);
 
         return {

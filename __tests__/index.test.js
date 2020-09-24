@@ -29,7 +29,7 @@ let resources = [
     urlPath: '/assets/application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
     filename: path.join(
       pageDirname,
-      'assets-application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
+      'hexlet-io-assets-application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
     ),
   },
   {
@@ -37,7 +37,7 @@ let resources = [
     urlPath: '/assets/professions/frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
     filename: path.join(
       pageDirname,
-      'assets-professions-frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
+      'hexlet-io-assets-professions-frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
     ),
   },
   {
@@ -45,7 +45,7 @@ let resources = [
     urlPath: '/packs/js/runtime-64630796b8e08f0f1f1d.js',
     filename: path.join(
       pageDirname,
-      'packs-js-runtime-64630796b8e08f0f1f1d.js',
+      'hexlet-io-packs-js-runtime-64630796b8e08f0f1f1d.js',
     ),
   },
   {
@@ -53,7 +53,7 @@ let resources = [
     urlPath: '/courses',
     filename: path.join(
       pageDirname,
-      'courses.html',
+      'hexlet-io-courses.html',
     ),
   },
 ];
