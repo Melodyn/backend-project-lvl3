@@ -2,9 +2,7 @@ import { promises as fsp } from 'fs';
 import path from 'path';
 import os from 'os';
 import nock from 'nock';
-import loader from '../index.js';
-
-const pageLoader = (url, outputDirPath) => loader(url, outputDirPath, 'silent');
+import pageLoader from '../index.js';
 
 const buildFixturesPath = (...paths) => path.join('__fixtures__', ...paths);
 const readFile = (dirpath, filename) => fsp.readFile(path.join(dirpath, filename), 'utf-8');
@@ -26,26 +24,26 @@ let expectedPageContent = '';
 let resources = [
   {
     format: 'css',
-    urlPath: '/assets/application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
+    urlPath: '/assets/application.css',
     filename: path.join(
       pageDirname,
-      'hexlet-io-assets-application-8c09cda7aec4e387f473cc08d778b2a7f8a1e9bfe968af0633e6ab8c2f38e03f.css',
+      'hexlet-io-assets-application.css',
     ),
   },
   {
     format: 'svg',
-    urlPath: '/assets/professions/frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
+    urlPath: '/assets/professions/nodejs.png',
     filename: path.join(
       pageDirname,
-      'hexlet-io-assets-professions-frontend-be958f979985faf47f82afea21e2d4f2ffb22b467f1c245d926dcb765b9ed953.svg',
+      'hexlet-io-assets-professions-nodejs.png',
     ),
   },
   {
     format: 'js',
-    urlPath: '/packs/js/runtime-64630796b8e08f0f1f1d.js',
+    urlPath: '/packs/js/runtime.js',
     filename: path.join(
       pageDirname,
-      'hexlet-io-packs-js-runtime-64630796b8e08f0f1f1d.js',
+      'hexlet-io-packs-js-runtime.js',
     ),
   },
   {
