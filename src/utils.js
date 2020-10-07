@@ -5,7 +5,6 @@ import cheerio from 'cheerio';
 import 'axios-debug-log';
 
 // urls
-
 const urlToName = (link, defaultFormat = 'html', type = 'resource') => {
   const processName = (name, replacer = '-') => name.match(/\w*/gi)
     .filter((x) => x)
@@ -51,11 +50,11 @@ export const processAssets = (html, assetsDirname, origin) => {
       return localAssets.map((element) => {
         const urlPath = $(element).attr(attrName);
         const url = new URL(urlPath, origin);
-        const filepath = path.join(assetsDirname, urlToFilename(url.hostname + url.pathname));
-        $(element).attr(attrName, filepath);
+        const relativePath = path.join(assetsDirname, urlToFilename(url.hostname + url.pathname));
+        $(element).attr(attrName, relativePath);
 
         return {
-          filepath,
+          relativePath,
           link: url.toString(),
         };
       });

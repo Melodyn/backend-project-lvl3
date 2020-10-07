@@ -11,57 +11,41 @@ import {
 } from './utils.js';
 
 const log = debug('page-loader');
-Listr.prototype.addTask = function addTask(title, fn) {
-  return this.add({
-    title,
-    task: (ctx) => Promise.resolve(fn(ctx.result)).then((result) => {
-      ctx.result = result;
-    }),
-  });
-};
 
-const pageLoader = (url, outputDirPath, progressBar) => new Listr([], { renderer: progressBar })
-  .addTask(`Load page ${url.toString()}`,
-    () => {
-      log('Input data', { url: url.toString(), outputDirPath });
-      return loadContent(url.toString());
-    })
-  .addTask('Prepare filenames and create assets directory',
-    (page) => {
-      const pageLink = url.hostname + url.pathname;
-      const pageFilename = urlToFilename(pageLink);
-      const assetsDirname = urlToDirname(url.hostname + url.pathname);
-      const assetsDirpath = buildPath(outputDirPath, assetsDirname);
+const pageLoader = (url, outputDirPath, progressBar) => {
+  const pageLink = url.hostname + url.pathname;
+  const pageFilename = urlToFilename(pageLink);
+  const assetsDirname = urlToDirname(pageLink);
+  const assetsDirpath = buildPath(outputDirPath, assetsDirname);
+  log('Input data', { url: url.toString(), outputDirPath, pageFilename });
+
+  return loadContent(url.toString())
+    .then((page) => {
       log('Create assets directory', { assetsDirpath });
-      return createDir(assetsDirpath).then(() => ({ page, pageFilename, assetsDirname }));
+      return createDir(assetsDirpath).then(() => page);
     })
-  .addTask('Process assets links and save page',
-    ({ page, pageFilename, assetsDirname }) => {
+    .then((page) => {
       log('Process assets links', { assetsDirname, origin: url.origin });
-      const {
-        page: processedPage,
-        assetsPaths,
-      } = processAssets(page, assetsDirname, url.origin);
-      const pagePath = buildPath(outputDirPath, pageFilename);
-      log('Save page', { pagePath });
-      return createFile(pagePath, processedPage).then(() => assetsPaths);
+      return processAssets(page, assetsDirname, url.origin);
     })
-  .addTask('Load page assets',
-    (assetsPaths) => {
+    .then(({ page, assetsPaths }) => {
+      const filepath = buildPath(outputDirPath, pageFilename);
+      log('Save page with processed links', { filepath });
+      return createFile(filepath, page).then(() => assetsPaths);
+    })
+    .then((assetsPaths) => {
       log('Load page assets', { count: assetsPaths.length });
-      const promises = assetsPaths.map(({ link, filepath }) => loadContent(link)
-        .then((data) => ({ filepath, data })));
-      return Promise.all(promises);
-    })
-  .addTask('Save assets',
-    (assets) => {
-      log('Save assets', { count: assets.length });
-      const promises = assets.map(({ filepath, data }) => createFile(
-        buildPath(outputDirPath, filepath),
-        data,
-      ));
-      return Promise.all(promises);
-    })
-  .run();
+      const promises = assetsPaths.map(({ link, relativePath }) => {
+        const filepath = buildPath(outputDirPath, relativePath);
+        log('Download asset', { link, filepath });
+        return {
+          title: link,
+          task: () => loadContent(link).then((data) => createFile(filepath, data)),
+        };
+      });
+      const listr = new Listr(promises, { concurrent: true, renderer: progressBar });
+      return listr.run();
+    });
+};
 
 export default pageLoader;

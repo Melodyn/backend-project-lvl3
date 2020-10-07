@@ -1,10 +1,12 @@
 import { promises as fsp } from 'fs';
 import path from 'path';
 import os from 'os';
+import { fileURLToPath } from 'url';
 import nock from 'nock';
 import pageLoader from '../index.js';
 
-const buildFixturesPath = (...paths) => path.join('__fixtures__', ...paths);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const buildFixturesPath = (...paths) => path.join(__dirname, '..', '__fixtures__', ...paths);
 const readFile = (dirpath, filename) => fsp.readFile(path.join(dirpath, filename), 'utf-8');
 const fileExists = (filepath) => {
   const dirname = path.dirname(filepath);
