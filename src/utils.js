@@ -5,27 +5,23 @@ import cheerio from 'cheerio';
 import 'axios-debug-log';
 
 // urls
-const urlToName = (link, defaultFormat = 'html', type = 'resource') => {
+
+const urlToName = (link, defaultPostfix = 'html') => {
   const processName = (name, replacer = '-') => name.match(/\w*/gi)
     .filter((x) => x)
     .join(replacer);
 
   const { dir, name, ext } = path.parse(link);
 
-  if (type === 'resource') {
-    const slug = processName(path.join(dir, name));
-    const format = ext.slice(1) || defaultFormat;
+  const format = (defaultPostfix === 'files') ? ext : '';
+  const slug = processName(path.join(dir, name, format));
+  const postfix = ext.slice(1) || defaultPostfix;
 
-    return [slug, format];
-  }
-
-  const slug = processName(path.join(dir, name, ext));
-
-  return [slug, defaultFormat];
+  return [slug, postfix];
 };
 
 export const urlToFilename = (link) => urlToName(link).join('.');
-export const urlToDirname = (link) => urlToName(link, 'files', 'directory').join('_');
+export const urlToDirname = (link) => urlToName(link, 'files').join('_');
 
 // pages
 
