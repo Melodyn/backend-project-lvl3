@@ -15,9 +15,9 @@ const fileExists = (filepath) => {
     .then((filenames) => filenames.includes(filename));
 };
 
-const pageDirname = 'hexlet-io-courses_files';
-const pageFilename = 'hexlet-io-courses.html';
-const baseUrl = 'https://hexlet.io';
+const pageDirname = 'ru-hexlet-io-courses_files';
+const pageFilename = 'ru-hexlet-io-courses.html';
+const baseUrl = 'https://ru.hexlet.io';
 const pagePath = '/courses';
 const pageUrl = new URL(pagePath, baseUrl);
 
@@ -29,7 +29,7 @@ let resources = [
     urlPath: '/assets/application.css',
     filename: path.join(
       pageDirname,
-      'hexlet-io-assets-application.css',
+      'ru-hexlet-io-assets-application.css',
     ),
   },
   {
@@ -37,7 +37,7 @@ let resources = [
     urlPath: '/assets/professions/nodejs.png',
     filename: path.join(
       pageDirname,
-      'hexlet-io-assets-professions-nodejs.png',
+      'ru-hexlet-io-assets-professions-nodejs.png',
     ),
   },
   {
@@ -45,7 +45,7 @@ let resources = [
     urlPath: '/packs/js/runtime.js',
     filename: path.join(
       pageDirname,
-      'hexlet-io-packs-js-runtime.js',
+      'ru-hexlet-io-packs-js-runtime.js',
     ),
   },
   {
@@ -53,7 +53,7 @@ let resources = [
     urlPath: '/courses',
     filename: path.join(
       pageDirname,
-      'hexlet-io-courses.html',
+      'ru-hexlet-io-courses.html',
     ),
   },
 ];
