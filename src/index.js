@@ -10,7 +10,7 @@ import {
   createFile,
 } from './utils.js';
 
-const log = debug('page-loader');
+const log = debug('page:loader');
 
 const pageLoader = (url, outputDirPath, progressBar) => {
   const pageLink = url.hostname + url.pathname;
