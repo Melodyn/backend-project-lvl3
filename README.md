@@ -1,6 +1,7 @@
 # Hexlet: "Загрузчик страниц"
 
-[![Github Actions](../../workflows/Node.js%20CI/badge.svg)](../../actions)
+[![Github Actions](../../workflows/Node.js%20CI/badge.svg)](../../actions?query=workflow%3A"Node.js+CI")
+[![Hexlet check](../../workflows/hexlet-check/badge.svg)](../../actions?query=workflow%3Ahexlet-check)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/90a3516f1a2569997c5b/test_coverage)](https://codeclimate.com/github/Melodyn/backend-project-lvl3/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/90a3516f1a2569997c5b/maintainability)](https://codeclimate.com/github/Melodyn/backend-project-lvl3/maintainability)
 
