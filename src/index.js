@@ -45,7 +45,8 @@ const pageLoader = (url, outputDirPath, progressBar) => {
       });
       const listr = new Listr(promises, { concurrent: true, renderer: progressBar });
       return listr.run();
-    });
+    })
+    .then(() => ({ filename: pageFilename }));
 };
 
 export default pageLoader;
