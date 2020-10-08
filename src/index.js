@@ -14,10 +14,10 @@ const log = debug('page:loader');
 
 const pageLoader = (url, outputDirPath, progressBar) => {
   const pageLink = url.hostname + url.pathname;
-  const pageFilename = urlToFilename(pageLink);
+  const pageFilepath = buildPath(outputDirPath, urlToFilename(pageLink));
   const assetsDirname = urlToDirname(pageLink);
   const assetsDirpath = buildPath(outputDirPath, assetsDirname);
-  log('Input data', { url: url.toString(), outputDirPath, pageFilename });
+  log('Input data', { url: url.toString(), pageFilepath });
 
   return loadContent(url.toString())
     .then((page) => {
@@ -29,9 +29,8 @@ const pageLoader = (url, outputDirPath, progressBar) => {
       return processAssets(page, assetsDirname, url.origin);
     })
     .then(({ page, assetsPaths }) => {
-      const filepath = buildPath(outputDirPath, pageFilename);
-      log('Save page with processed links', { filepath });
-      return createFile(filepath, page).then(() => assetsPaths);
+      log('Save page with processed links', { pageFilepath });
+      return createFile(pageFilepath, page).then(() => assetsPaths);
     })
     .then((assetsPaths) => {
       log('Load page assets', { count: assetsPaths.length });
@@ -46,7 +45,7 @@ const pageLoader = (url, outputDirPath, progressBar) => {
       const listr = new Listr(promises, { concurrent: true, renderer: progressBar });
       return listr.run();
     })
-    .then(() => ({ filename: pageFilename }));
+    .then(() => ({ filename: pageFilepath }));
 };
 
 export default pageLoader;
