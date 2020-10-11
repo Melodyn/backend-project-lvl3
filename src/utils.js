@@ -6,22 +6,24 @@ import 'axios-debug-log';
 
 // urls
 
-const urlToName = (link, defaultPostfix = 'html') => {
-  const processName = (name, replacer = '-') => name.match(/\w*/gi)
-    .filter((x) => x)
-    .join(replacer);
+const processName = (name, replacer = '-') => name.match(/\w*/gi)
+  .filter((x) => x)
+  .join(replacer);
 
+export const urlToFilename = (link, defaultFormat = '.html') => {
   const { dir, name, ext } = path.parse(link);
+  const slug = processName(path.join(dir, name));
+  const format = ext || defaultFormat;
 
-  const format = (defaultPostfix === 'files') ? ext : '';
-  const slug = processName(path.join(dir, name, format));
-  const postfix = ext.slice(1) || defaultPostfix;
-
-  return [slug, postfix];
+  return `${slug}${format}`;
 };
 
-export const urlToFilename = (link) => urlToName(link).join('.');
-export const urlToDirname = (link) => urlToName(link, 'files').join('_');
+export const urlToDirname = (link, postfix = '_files') => {
+  const { dir, name, ext } = path.parse(link);
+  const slug = processName(path.join(dir, name, ext));
+
+  return `${slug}${postfix}`;
+};
 
 // pages
 
@@ -46,7 +48,10 @@ export const processAssets = (html, assetsDirname, origin) => {
       return localAssets.map((element) => {
         const urlPath = $(element).attr(attrName);
         const url = new URL(urlPath, origin);
-        const relativePath = path.join(assetsDirname, urlToFilename(url.hostname + url.pathname));
+        const relativePath = path.join(
+          assetsDirname,
+          urlToFilename(`${url.hostname}${url.pathname}`),
+        );
         $(element).attr(attrName, relativePath);
 
         return {

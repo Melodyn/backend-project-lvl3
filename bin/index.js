@@ -8,6 +8,7 @@ program.version('1.0.0')
   .option('-b, --progressBar [name]', 'progress bar name: default | silent', 'default')
   .arguments('<link>')
   .action((link) => pageLoader(link, program.output, program.progressBar)
+    .then(({ filename }) => console.log(`Page was loaded to ${filename}`))
     .catch((err) => {
       console.error(err.toString());
       process.exit(1);

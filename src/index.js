@@ -10,10 +10,10 @@ import {
   createFile,
 } from './utils.js';
 
-const log = debug('page:loader');
+const log = debug('page-loader');
 
 const pageLoader = (url, outputDirPath, progressBar) => {
-  const pageLink = url.hostname + url.pathname;
+  const pageLink = `${url.hostname}${url.pathname}`;
   const pageFilepath = buildPath(outputDirPath, urlToFilename(pageLink));
   const assetsDirname = urlToDirname(pageLink);
   const assetsDirpath = buildPath(outputDirPath, assetsDirname);
