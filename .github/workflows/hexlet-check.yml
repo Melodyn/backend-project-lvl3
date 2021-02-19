@@ -3,8 +3,9 @@ name: hexlet-check
 on:
   push:
     branches:
-      - master
-      - main
+      - '**'
+    tags:
+      - '**'
 
 jobs:
   build:
@@ -13,4 +14,6 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Hexlet project check
-        uses: hexlet/project-action@master
+        uses: hexlet/project-action@release
+        with:
+          hexlet-id: ${{ secrets.HEXLET_ID }}
