@@ -1,5 +1,5 @@
 {
-  "name": "@melodyn/backend-project-lvl3",
+  "name": "@hexlet/code",
   "version": "1.0.0",
   "description": "Утилита командной строки page-loader, которая, скачивает страницу из сети и кладет в указанную директорию (по умолчанию в директорию запуска программы).",
   "main": "index.js",
